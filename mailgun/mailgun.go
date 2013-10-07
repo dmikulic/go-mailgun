@@ -3,6 +3,7 @@ package mailgun
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -23,13 +24,14 @@ func (m Message) From() string {
 	return fmt.Sprintf("%s <%s>", m.FromName, m.FromAddress)
 }
 
-func Send(message Message) error {
+func Send(message Message) ([]byte, error) {
 	client := &http.Client{}
 
 	values := make(url.Values)
 	values.Set("from", message.From())
 	values.Set("to", message.ToAddress)
 	values.Set("subject", message.Subject)
+
 	if len(message.HtmlBody) > 0 {
 		values.Set("html", message.HtmlBody)
 	} else {
@@ -42,19 +44,16 @@ func Send(message Message) error {
 
 	response, e1 := client.Do(request)
 	if e1 != nil {
-		fmt.Println("Failed to send request")
-		fmt.Println(e1)
-		return e1
+		log.Println(e1)
+		return nil, e1
 	}
 	defer response.Body.Close()
 
 	body, e2 := ioutil.ReadAll(response.Body)
 	if e2 != nil {
-		fmt.Println("Failed to read response")
-		fmt.Println(e2)
-		return e2
+		log.Println(e2)
+		return nil, e2
 	}
 
-	fmt.Println(string(body))
-	return nil
+	return body, nil
 }
