@@ -3,7 +3,6 @@ package mailgun
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -44,14 +43,12 @@ func Send(message Message) ([]byte, error) {
 
 	response, e1 := client.Do(request)
 	if e1 != nil {
-		log.Println(e1)
 		return nil, e1
 	}
 	defer response.Body.Close()
 
 	body, e2 := ioutil.ReadAll(response.Body)
 	if e2 != nil {
-		log.Println(e2)
 		return nil, e2
 	}
 
